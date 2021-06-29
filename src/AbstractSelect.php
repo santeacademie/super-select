@@ -5,7 +5,6 @@
 
 namespace Santeacademie\SuperSelect;
 
-use Santeacademie\SuperUtil\TypeUtil;
 use Santeacademie\SuperSelect\Annotation\SelectOption;
 use Doctrine\Common\Annotations\AnnotationReader;
 
@@ -35,20 +34,25 @@ abstract class AbstractSelect
 
     public static function keys(?array $optionsFilters = null): array
     {
-        return TypeUtil::arrayFilterNull(array_map(function ($selectOption) use($optionsFilters) {
-            /** @var SelectOption $annotation */
-            $options = $selectOption['annotation']->getOptions();
+        return array_filter(
+            array: array_map(function ($selectOption) use($optionsFilters) {
+                /** @var SelectOption $annotation */
+                $options = $selectOption['annotation']->getOptions();
 
-            if (is_array($optionsFilters)) {
-                foreach($optionsFilters as $k => $v) {
-                    if (isset($options[$k]) && $options[$k] !== $optionsFilters[$k]) {
-                        return null;
+                if (is_array($optionsFilters)) {
+                    foreach($optionsFilters as $k => $v) {
+                        if (isset($options[$k]) && $options[$k] !== $optionsFilters[$k]) {
+                            return null;
+                        }
                     }
                 }
-            }
 
-            return $selectOption['value'];
-        }, self::readAnnotations())) ?? [];
+                return $selectOption['value'];
+            }, self::readAnnotations()),
+            callback: function($item) {
+                return $item !== null;
+            }
+        ) ?? [];
     }
 
     public static function keysWithDescriptions(?array $optionsFilters = null): array
