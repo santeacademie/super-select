@@ -41,7 +41,7 @@ class SelectOption
 
         if (is_array($this->options)) {
             foreach ($this->options as $key => &$value) {
-                if (str_contains($value, '::$')) {
+                if ($value !== null && str_contains($value, '::$')) {
                     list($className, $propertyName) = explode('::$', $value);
                     $class = new \ReflectionClass($className);
                     $value = $class->getStaticPropertyValue($propertyName);
